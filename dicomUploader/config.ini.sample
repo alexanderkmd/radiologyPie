@@ -1,0 +1,7 @@
+[Local]
+MonitorPath=/your/monitor/path
+
+[Amazon]
+AccessKey=yourAWS_AccessKeyId
+SecretKey=yourAWS_SecretKeyId
+bucket=yourUploadBucketName
