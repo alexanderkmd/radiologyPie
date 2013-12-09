@@ -30,6 +30,22 @@ def get_config_value(section, parameter):
             return Config.get(section, parameter)
     print "No such section and/or parameter"
     return ""
+
+def get_config_section(section):
+    dictl = {}
+    if Config.has_section(section):
+        options = Config.options(section)
+        for option in options:
+            try:
+                dictl[option] = Config.get(section, option)
+                if dictl[option] == -1:
+                    DebugPrint("skip: %s" % option)
+            except:
+                print("exception on %s!" % option)
+                dictl[option] = None
+    else:
+        print "No such section and/or parameter"
+    return dictl
                 
 def set_config_value(section, parameter, value):
     # дописывает новый параметр или изменяет его в конфиге
