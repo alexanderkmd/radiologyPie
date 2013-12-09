@@ -1,9 +1,9 @@
+# -*- coding: UTF-8 -*-
 from os import listdir
 from os.path import isfile, isdir, join
 
-import ConfigParser
 
-def fileLister(path):
+def file_lister(path):
     mypath=path
     
     fileList=[f for f in listdir(mypath)]
@@ -13,4 +13,4 @@ def fileLister(path):
 
     print fileList
 
-fileLister("/Users/AlexanderK/")
+file_lister("/Users/AlexanderK/")
