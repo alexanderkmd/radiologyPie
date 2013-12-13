@@ -3,24 +3,54 @@
 # 2013-12-09
 
 import ConfigParser
+import codecs
 import os.path
 from os.path import join
 
-Config = ConfigParser.ConfigParser()
+
+class UnicodeConfigParser(ConfigParser.RawConfigParser):
+
+    def __init__(self, defaults=None, dict_type=dict):
+        ConfigParser.RawConfigParser.__init__(self, defaults, dict_type)
+
+    def write(self, fp):
+        """Fixed for Unicode output"""
+        if self._defaults:
+            fp.write("[%s]\n" % DEFAULTSECT)
+            for (key, value) in self._defaults.items():
+                fp.write("%s = %s\n" % (key, unicode(value).replace('\n', '\n\t')))
+            fp.write("\n")
+        for section in self._sections:
+            fp.write("[%s]\n" % section)
+            for (key, value) in self._sections[section].items():
+                if key != "__name__":
+                    fp.write("%s = %s\n" %
+                             (key, unicode(value).replace('\n', '\n\t')))
+            fp.write("\n")
+
+    # This function is needed to override default lower-case conversion
+    # of the parameter's names. They will be saved 'as is'.
+    def optionxform(self, strOut):
+        return strOut
+
+
+Config = UnicodeConfigParser()
 
 localDir = os.path.dirname(__file__)
-configFile=join(localDir,"config.ini")
+configFile = join(localDir, "config.ini")
+
 
 def open_config():    
-    # открывает файл конфига, если такового нет - записывает дефолтные значения в новый файл
-    if (os.path.exists(configFile)):
-        Config.read(configFile)
+    # открывает файл конфига, если такового нет - записывает значения из примера
+    if os.path.exists(configFile):
+        Config.readfp(codecs.open(configFile, 'r', 'utf-8'))
     else:
-        print("Creating new config file - please fill it in and restart")
-        set_config_value('Local', 'MonitorPath', '/your/monitor/Path')
-        set_config_value('Amazon', 'AccessKey', 'yourAWS_AccessKeyId')
-        set_config_value('Amazon', 'SecretKey', 'yourAWS_SecretKeyId')
-        set_config_value('Amazon', 'bucket', 'yourUploadBucketName')
+        configSampleFile = join(localDir, "config.ini.sample")
+        if os.path.exists(configSampleFile):
+            print("[INFO] Creating new config file from example - please fill it in and restart")
+            Config.readfp(codecs.open(configSampleFile, 'r', 'utf-8'))
+        else:
+            print("[ERROR] You have to fill in config manually!")
 
 
 def get_config_value(section, parameter):
@@ -30,6 +60,7 @@ def get_config_value(section, parameter):
             return Config.get(section, parameter)
     print "No such section and/or parameter"
     return ""
+
 
 def get_config_section(section):
     dictl = {}
@@ -46,13 +77,15 @@ def get_config_section(section):
     else:
         print "No such section and/or parameter"
     return dictl
-                
+
+
 def set_config_value(section, parameter, value):
     # дописывает новый параметр или изменяет его в конфиге
-    if (Config.has_section(section) == False):
+    if not Config.has_section(section):
         Config.add_section(section)
     Config.set(section, parameter, value)
-    with open(configFile, 'wb') as conf:
-        Config.write(conf)
+    confFile = codecs.open(configFile, 'w', 'utf-8')
+    Config.write(confFile)
+    confFile.close()
         
 open_config()
