@@ -28,7 +28,8 @@ class Form(wx.Panel):
         
     def bind_events(self):
         for control, event, handler in \
-        [(self.btnChangeMonitorFolder, wx.EVT_BUTTON, self.change_monitor_folder)]:
+            [(self.btnChangeMonitorFolder, wx.EVT_BUTTON, self.change_monitor_folder),
+                (self.btnSecretKeyChange, wx.EVT_BUTTON, self.change_secret_key)]:
             control.Bind(event, handler)
             
     def do_layout(self):
@@ -77,10 +78,17 @@ class Form(wx.Panel):
             self.__log('Chosen %s' % directory)
             self.textMonitorFolder.Value = directory
             config.set_config_value('Local', 'MonitorPath', directory)
-        else:
-            self.__log('Folder not changed')
         dlg.Destroy()
-        
+
+    def change_secret_key(self, event):
+        self.__log('Change secret button pressed')
+        dlg = wx.TextEntryDialog(None, "Введите секретный ключ, выданный вам",
+                                 "Секретный ключ", config.get_config_value("Amazon", "SecretKey"), style=wx.OK|wx.CANCEL)
+        if dlg.ShowModal() == wx.ID_OK:
+            config.set_config_value("Amazon", "SecretKey", dlg.GetValue())
+            self.__log("SecretKey changed")
+        dlg.Destroy()
+
     def __log(self, message):
         self.logger.AppendText("%s\n" % message)
 
