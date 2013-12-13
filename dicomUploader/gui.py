@@ -2,54 +2,57 @@
 # -*- coding: UTF-8 -*-
 
 import wx
+import config
+
 
 class Form(wx.Panel):
     
-    def __init__ (self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
-        self.createControls()
-        self.bindEvents()
-        self.doLayout()
+        self.create_controls()
+        self.bind_events()
+        self.do_layout()
         
-    def createControls(self):
+    def create_controls(self):
         self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY)
-        self.labelChangeMonitorFolder = wx.StaticText(self, label="Folder")
+        self.labelChangeMonitorFolder = wx.StaticText(self, label="Отслеживаемая папка")
         self.btnChangeMonitorFolder = wx.Button(self, label="...")
         self.textMonitorFolder = wx.TextCtrl(self, style=wx.TE_READONLY)
-        self.labelAccessKey = wx.StaticText(self, label="Access Key")
-        self.textAccessKey = wx.TextCtrl(self, value="Enter Access Key")
-        self.labelSecretKey = wx.StaticText(self, label="Secret Key")
-        self.textSecretKey = wx.TextCtrl(self, value="Enter Secret Key")
-        self.labelBucket = wx.StaticText(self, label="Bucket")
-        self.textBucket = wx.TextCtrl(self, value="Upload Bucket")
+        self.labelAccessKey = wx.StaticText(self, label="Ключ доступа")
+        self.textAccessKey = wx.TextCtrl(self, value="Введите ключ доступа")
+        self.btnSecretKeyChange = wx.Button(self, label="Изменить секрет")
+        self.labelSecretKey = wx.StaticText(self, label="Секретный ключ")
+        self.textSecretKey = wx.TextCtrl(self, value="Введите секретный ключ")
+        self.labelBucket = wx.StaticText(self, label="Репозиторий")
+        self.textBucket = wx.TextCtrl(self, value="Название репозитория")
         
-    def bindEvents(self):
+    def bind_events(self):
         for control, event, handler in \
-        [(self.btnChangeMonitorFolder, wx.EVT_BUTTON, self.changeMonitorFolder)]:
+        [(self.btnChangeMonitorFolder, wx.EVT_BUTTON, self.change_monitor_folder)]:
             control.Bind(event, handler)
             
-    def doLayout(self):
+    def do_layout(self):
         boxSizer = wx.BoxSizer(orient=wx.VERTICAL)
-        gridSizer = wx.FlexGridSizer (rows=5, cols=3, vgap=10, hgap=10)
+        gridSizer = wx.FlexGridSizer(rows=5, cols=3, vgap=10, hgap=5)
         
         expandOption = dict(flag=wx.EXPAND)
         noOptions = dict()
         emptySpace = ((0,0), noOptions)
         
         for control, options in \
-        [(self.labelAccessKey, noOptions),
-            (self.textAccessKey, expandOption), emptySpace,
-            (self.labelSecretKey, noOptions),
-            (self.textSecretKey, expandOption), emptySpace,
-            (self.labelBucket, noOptions),
-            (self.textBucket, expandOption), emptySpace,
-            (self.labelChangeMonitorFolder, noOptions),
-            (self.textMonitorFolder, expandOption), (self.btnChangeMonitorFolder, noOptions)]:
+            [(self.labelAccessKey, noOptions),
+                (self.textAccessKey, expandOption), (self.btnSecretKeyChange, noOptions),
+                (self.labelSecretKey, noOptions),
+                (self.textSecretKey, expandOption), emptySpace,
+                (self.labelBucket, noOptions),
+                (self.textBucket, expandOption), emptySpace,
+                (self.labelChangeMonitorFolder, noOptions),
+                (self.textMonitorFolder, expandOption), (self.btnChangeMonitorFolder, noOptions)]:
             gridSizer.Add(control, **options)
         
         for control, options in \
-        [(gridSizer, dict(border=5, flag=wx.ALL)),
-            (self.logger, dict(border=5, flag=wx.ALL|wx.EXPAND, proportion=1))]:
+            [(gridSizer, dict(border=5, flag=wx.ALL)),
+                (self.logger, dict(border=5, flag=wx.ALL | wx.EXPAND, proportion=1))]:
             boxSizer.Add(control, **options)
         
         self.SetSizerAndFit(boxSizer)
@@ -66,20 +69,20 @@ class Form(wx.Panel):
             (self.textBucket, 50, -1, -1, -1)]:
             control.SetDimensions(x=x, y=y, width=width, height=height)'''
             
-    def changeMonitorFolder(self, event):
-		self.__log('Change Monitor Folder button clicked')
-		dlg = wx.DirDialog(self, "�������� ����� ��� �����������")
-		if dlg.ShowModal() == wx.ID_OK:
-			dir = dlg.GetPath()
-			self.__log('Chosen %s'%dir)
-			self.textMonitorFolder.Value = dir
-		else:
-			self.__log('Folder not changed')
-		dlg.Destroy()
-		
+    def change_monitor_folder(self, event):
+        self.__log('Change Monitor Folder button clicked')
+        dlg = wx.DirDialog(self, "Выберите папку для мониторинга")
+        if dlg.ShowModal() == wx.ID_OK:
+            directory = dlg.GetPath()
+            self.__log('Chosen %s' % directory)
+            self.textMonitorFolder.Value = directory
+            config.set_config_value('Local', 'MonitorPath', directory)
+        else:
+            self.__log('Folder not changed')
+        dlg.Destroy()
         
     def __log(self, message):
-        self.logger.AppendText("%s\n"%message)
+        self.logger.AppendText("%s\n" % message)
 
         
 class MyFrame(wx.Frame):
@@ -88,7 +91,7 @@ class MyFrame(wx.Frame):
         self.form = Form(self)
         self.Show()
         
-if __name__ == '__main__':        
-    app = wx.App(0)
-    frame = MyFrame()
-    app.MainLoop()
+#if __name__ == '__main__':
+#    app = wx.App(0)
+#    frame = MyFrame()
+#    app.MainLoop()
