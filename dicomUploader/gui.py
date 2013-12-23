@@ -3,6 +3,7 @@
 
 import wx
 import config
+import fileworker
 
 
 class Form(wx.Panel):
@@ -14,17 +15,17 @@ class Form(wx.Panel):
         self.do_layout()
         
     def create_controls(self):
-        self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self.labelChangeMonitorFolder = wx.StaticText(self, label="Отслеживаемая папка")
         self.btnChangeMonitorFolder = wx.Button(self, label="...")
-        self.textMonitorFolder = wx.TextCtrl(self, style=wx.TE_READONLY)
+        self.textMonitorFolder = wx.TextCtrl(self, style=wx.TE_READONLY, value=config.get_config_value("Local", "MonitorPath"))
         self.labelAccessKey = wx.StaticText(self, label="Ключ доступа")
-        self.textAccessKey = wx.TextCtrl(self, value="Введите ключ доступа")
+        self.textAccessKey = wx.TextCtrl(self, value=config.get_config_value("Amazon", "AccessKey"))
         self.btnSecretKeyChange = wx.Button(self, label="Изменить секрет")
-        self.labelSecretKey = wx.StaticText(self, label="Секретный ключ")
-        self.textSecretKey = wx.TextCtrl(self, value="Введите секретный ключ")
+        #self.labelSecretKey = wx.StaticText(self, label="Секретный ключ")
+        #self.textSecretKey = wx.TextCtrl(self, value="Введите секретный ключ")
         self.labelBucket = wx.StaticText(self, label="Репозиторий")
-        self.textBucket = wx.TextCtrl(self, value="Название репозитория")
+        self.textBucket = wx.TextCtrl(self, value=config.get_config_value("Amazon", "bucket"))
         
     def bind_events(self):
         for control, event, handler in \
@@ -43,8 +44,8 @@ class Form(wx.Panel):
         for control, options in \
             [(self.labelAccessKey, noOptions),
                 (self.textAccessKey, expandOption), (self.btnSecretKeyChange, noOptions),
-                (self.labelSecretKey, noOptions),
-                (self.textSecretKey, expandOption), emptySpace,
+                #(self.labelSecretKey, noOptions),
+                #(self.textSecretKey, expandOption), emptySpace,
                 (self.labelBucket, noOptions),
                 (self.textBucket, expandOption), emptySpace,
                 (self.labelChangeMonitorFolder, noOptions),
@@ -82,8 +83,9 @@ class Form(wx.Panel):
 
     def change_secret_key(self, event):
         self.__log('Change secret button pressed')
-        dlg = wx.TextEntryDialog(None, "Введите секретный ключ, выданный вам",
-                                 "Секретный ключ", config.get_config_value("Amazon", "SecretKey"), style=wx.OK|wx.CANCEL)
+        dlg = wx.TextEntryDialog(None, "Введите секретный ключ, выданный вам", "Секретный ключ",
+                                 config.get_config_value("Amazon", "SecretKey"), style=wx.OK|wx.CANCEL)
+
         if dlg.ShowModal() == wx.ID_OK:
             config.set_config_value("Amazon", "SecretKey", dlg.GetValue())
             self.__log("SecretKey changed")
