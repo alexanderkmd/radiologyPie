@@ -4,6 +4,7 @@
 
 import config
 import amazon
+import hashlib
 from datetime import datetime
 
 
@@ -52,6 +53,25 @@ def uploadFiles(filelist):
     #загружает
     return True
 
+	
+def md5_for_file(file, block_size=2**20):
+    # проверка - если строка - то это путь к фалу, который надо открыть
+	# если передана ссылка на файл, то должен быть скормлен двоичный ввод ('rb') при открытии
+    if isinstance(file, basestring):
+		f = open(file, 'rb')
+    else:
+	    f = file
+    md5 = hashlib.md5()
+    while True:
+        data = f.read(block_size)
+        if not data:
+            break
+        md5.update(data)
+    if isinstance(file, basestring):
+	    # закрываем файл, если мы его открывали
+	    f.close()
+    return md5.hexdigest()
+	
 filelist = list_monitor_folder()
 
 uploadFiles(filelist)
