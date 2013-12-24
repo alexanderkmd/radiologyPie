@@ -43,24 +43,35 @@ def isdicomfile(filename):
 
 
 def uploadFiles(filelist):
-    i=1
     putpath = datetime.now().strftime("%Y/%m/%d/%H/%M/%S")
-    print putpath
+
+    # длина префикса мониторируемой папки для отрезания этой части от пути
+    # (формирование относительного пути)
+    pathprefix = config.get_config_value("Local", "MonitorPath")
+    pathprefixlen = pathprefix.__len__()
+
     for file in filelist:
-        #amazon.put_item_to_bucket(file, str(i), putpath)
-        i += 1
+        meta = {} # dict для метаданных, передаваемых с файлом
+
+        hash = md5_for_file(file)
+        # отрезание префикса и формирование относительного пути
+        originalpath = file[pathprefixlen:]
+        meta['md5'] = hash
+        meta['path'] = originalpath
+
+        print meta #originalpath + " - " + hash
+        #amazon.put_item_to_bucket(file, str(i), putpath, meta)
         pass
-    #загружает
     return True
 
-	
+
 def md5_for_file(file, block_size=2**20):
     # проверка - если строка - то это путь к фалу, который надо открыть
-	# если передана ссылка на файл, то должен быть скормлен двоичный ввод ('rb') при открытии
+    # если передана ссылка на файл, то должен быть скормлен двоичный ввод ('rb') при открытии
     if isinstance(file, basestring):
-		f = open(file, 'rb')
+        f = open(file, 'rb')
     else:
-	    f = file
+        f = file
     md5 = hashlib.md5()
     while True:
         data = f.read(block_size)
@@ -68,10 +79,9 @@ def md5_for_file(file, block_size=2**20):
             break
         md5.update(data)
     if isinstance(file, basestring):
-	    # закрываем файл, если мы его открывали
-	    f.close()
+        f.close() # закрываем файл, если мы его открывали
     return md5.hexdigest()
-	
+
 filelist = list_monitor_folder()
 
 uploadFiles(filelist)
