@@ -13,17 +13,19 @@ for item in bucket.list():
     print item.name
 
 
-def put_item_to_bucket(file, name, storepath, metadata={}):
-    # file - полный путь к файлу для загрузки
+def put_item_to_bucket(file_path, name, storepath, metadata={}):
+    # file_path - полный путь к файлу для загрузки
     # name - имя, под которым записать
     # storepath - путь, где записать
     # metadata - dict с метаданными
     key = Key(bucket)
     key.key = storepath + "/" + name
-    
-    for k, v in metadata.iteritems()
+
+    key.set_metadata("user", amazon['AccessKey'])  # пользователь, закачавший файл
+    for k, v in metadata.iteritems():
+        print k + " - " + v
         key.set_metadata(k, v)
     
-    key.set_contents_from_filename(filepath)
+    key.set_contents_from_filename(file_path)
 
     return 0
