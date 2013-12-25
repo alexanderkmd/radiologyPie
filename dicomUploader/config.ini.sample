@@ -5,3 +5,5 @@ MonitorPath=/your/monitor/path
 AccessKey=yourAWS_AccessKeyId
 SecretKey=yourAWS_SecretKeyId
 bucket=yourUploadBucketName
+queue=yourMessageQueue
+AmazonRegion = eu-west-1

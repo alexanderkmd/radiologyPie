@@ -61,6 +61,9 @@ def upload_files(filelist):
 
         print meta #originalpath + " - " + hash
         amazon.put_item_to_bucket(file, hash, putpath, meta)
+
+        meta['storepath'] = putpath + hash
+        amazon.put_message_to_queue(meta)
         pass
     return True
 

@@ -2,15 +2,28 @@
 # -*- coding: UTF-8 -*-
 from boto.s3.connection import S3Connection
 from boto.s3.bucket import Key
+import boto.sqs
+from boto.sqs.message import Message
 import config
+import ast
+
 
 amazon = config.get_config_section("Amazon")
-s3conn = S3Connection(amazon['AccessKey'], amazon['SecretKey'])
 
+# Подключение к S3
+s3conn = S3Connection(amazon['AccessKey'], amazon['SecretKey'])
 bucket = s3conn.get_bucket(amazon['bucket'])
 
-for item in bucket.list():
-    print item.name
+# Подключение к SQS
+sqsconn = boto.sqs.connect_to_region(amazon['AmazonRegion'],
+                                     aws_access_key_id=amazon['AccessKey'],
+                                     aws_secret_access_key=amazon['SecretKey'])
+queue = sqsconn.create_queue(amazon['queue'])
+print sqsconn.region
+
+
+#for item in bucket.list():
+#    print item.name
 
 
 def put_item_to_bucket(file_path, name, storepath, metadata={}):
@@ -29,3 +42,26 @@ def put_item_to_bucket(file_path, name, storepath, metadata={}):
     key.set_contents_from_filename(file_path)
 
     return 0
+
+
+def put_message_to_queue(data={}):
+    m = Message()
+    data['user'] = amazon['AccessKey']
+    body = data.__str__()
+    m.set_body(body)
+
+    status = queue.write(m)
+    if status:
+        print "Message sent"
+    else:
+        print "ERROR sending message"
+    return 0
+
+
+def get_message_from_queue():
+    rs = queue.get_messages()
+    for m in rs:
+        body = ast.literal_eval(m.get_body())
+    return body
+
+
