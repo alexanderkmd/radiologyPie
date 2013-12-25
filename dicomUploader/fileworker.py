@@ -37,21 +37,21 @@ def list_files(path, recursive=True):
     return file_list
 
 
-def isdicomfile(filename):
+def is_dicom_file(filename):
     # заготовка под определитель дикомовский ли файл
     return True
 
 
-def uploadFiles(filelist):
+def upload_files(filelist):
     putpath = datetime.now().strftime("%Y/%m/%d/%H/%M/%S")
 
     # длина префикса мониторируемой папки для отрезания этой части от пути
-    # (формирование относительного пути)
+    # (формирование относительного пути) + 1 для backslash
     pathprefix = config.get_config_value("Local", "MonitorPath")
-    pathprefixlen = pathprefix.__len__()
+    pathprefixlen = pathprefix.__len__() + 1
 
     for file in filelist:
-        meta = {} # dict для метаданных, передаваемых с файлом
+        meta = {}  # dict для метаданных, передаваемых с файлом
 
         hash = md5_for_file(file)
         # отрезание префикса и формирование относительного пути
@@ -60,7 +60,7 @@ def uploadFiles(filelist):
         meta['path'] = originalpath
 
         print meta #originalpath + " - " + hash
-        #amazon.put_item_to_bucket(file, str(i), putpath, meta)
+        amazon.put_item_to_bucket(file, hash, putpath, meta)
         pass
     return True
 
@@ -79,18 +79,11 @@ def md5_for_file(file, block_size=2**20):
             break
         md5.update(data)
     if isinstance(file, basestring):
-        f.close() # закрываем файл, если мы его открывали
+        f.close()  # закрываем файл, если мы его открывали
     return md5.hexdigest()
 
-filelist = list_monitor_folder()
+file_list = list_monitor_folder()
 
-uploadFiles(filelist)
+upload_files(file_list)
 
-print filelist.__len__()
-
-now = datetime.now()
-
-#now.strftime("%Y/%m/%d/%H/%M/%S")
-
-
-
+print file_list.__len__()
