@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 from boto.s3.connection import S3Connection
 from boto.s3.bucket import Key
+from boto.s3.bucket import Bucket
 import boto.sqs
 from boto.sqs.message import Message
 import config
@@ -12,7 +13,7 @@ amazon = config.get_config_section("Amazon")
 
 # Подключение к S3
 s3conn = S3Connection(amazon['AccessKey'], amazon['SecretKey'])
-bucket = s3conn.get_bucket(amazon['bucket'])
+bucket = Bucket(s3conn, amazon['bucket'])
 
 # Подключение к SQS
 sqsconn = boto.sqs.connect_to_region(amazon['AmazonRegion'],
