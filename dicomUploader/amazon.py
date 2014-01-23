@@ -8,7 +8,6 @@ from boto.sqs.message import Message
 import config
 import ast
 
-
 amazon = config.get_config_section("Amazon")
 
 # Подключение к S3
@@ -26,7 +25,6 @@ print sqsconn.region
 #for item in bucket.list():
 #    print item.name
 
-
 def put_item_to_bucket(file_path, name, storepath, metadata={}):
     # file_path - полный путь к файлу для загрузки
     # name - имя, под которым записать
@@ -36,11 +34,17 @@ def put_item_to_bucket(file_path, name, storepath, metadata={}):
     key.key = storepath + "/" + name
 
     key.set_metadata("user", amazon['AccessKey'])  # пользователь, закачавший файл
+    #key.set_metadata("Content-Type", "application/octet-stream")
     for k, v in metadata.iteritems():
         print k + " - " + v
         key.set_metadata(k, v)
     
     key.set_contents_from_filename(file_path)
+	# проблема с неправильной кодировкой в mimetype и 
+	# реестром (Windows) решается заменой на строки:
+	# pass
+    # #ctype = ctype.encode(default_encoding) # omit in 3.x!
+	# на 249 строке файла {PythonPath}\Lib\mimetypes.py
 
     return 0
 
