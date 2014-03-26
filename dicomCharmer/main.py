@@ -33,7 +33,7 @@ def process_dicom_file(ds):
     #забиваем unicode как чарсет по умолчанию, если не указан другой
     if not "SpecificCharacterSet" in ds:
         #print ds[0x08,0x05].value
-        ds.SpecificCharacterSet = "ISO_IR 192"
+        ds.SpecificCharacterSet = "ISO_IR 192"  # UTF-8
 
     # Прописываем имя пациента, расшифровывая его из того, что есть
     name = ds.PatientName
